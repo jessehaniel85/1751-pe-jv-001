@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Modelo de settings.xml para resolver TODAS as dependências via Nexus Caixa.
+  Substituir <NEXUS_URL>, usuário e senha pelos valores reais do ambiente.
+  Objetivo: nenhum download direto do Maven Central — tudo passa pelo Nexus.
+  Validar na Semana 0 com:  mvn -s settings.xml dependency:get -Dartifact=io.quarkus.platform:quarkus-bom:3.15.7:pom
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+
+  <servers>
+    <server>
+      <id>nexus-caixa</id>
+      <username>${env.NEXUS_USER}</username>
+      <password>${env.NEXUS_PASS}</password>
+    </server>
+  </servers>
+
+  <mirrors>
+    <!-- Espelha TODO o tráfego de artefatos para o Nexus interno. -->
+    <mirror>
+      <id>nexus-caixa</id>
+      <name>Nexus Caixa - proxy de tudo</name>
+      <url><NEXUS_URL>/repository/maven-public/</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>nexus</id>
+      <repositories>
+        <repository>
+          <id>nexus-caixa</id>
+          <url><NEXUS_URL>/repository/maven-public/</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>nexus-caixa</id>
+          <url><NEXUS_URL>/repository/maven-public/</url>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>nexus</activeProfile>
+  </activeProfiles>
+
+</settings>
