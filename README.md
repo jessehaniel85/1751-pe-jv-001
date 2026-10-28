@@ -4,6 +4,7 @@ Este repositório contém o material da turma 1751 no módulo pe-jv-001 · Intro
 
 Conteúdo
 - Material do aluno por encontro (leitura de consolidação)
+- Código do projeto hands-on (Agenda de Atendimento), escrito junto em aula e publicado ao fim de cada aula
 - Código do projeto guiado (API de Chaves PIX): ponto de partida e estado ao fim de cada aula
 - Brief do projeto final em grupo, com critérios de avaliação
 
@@ -11,6 +12,7 @@ Estrutura
 - README.md — visão geral (este arquivo)
 - /ambiente — checklist de configuração (tarefa prévia) e `settings.xml` do Nexus
 - /plano-de-aulas — material do aluno por encontro (`aula-0X-aluno.md`)
+- /projetos/projeto-hands-on — `agenda-atendimento/`, o projeto que começamos do zero na Aula 1 e evoluímos a cada aula (aparece depois da Aula 1)
 - /projetos/projeto-guiado-chaves-pix — `inicio/` (ponto de partida da Aula 1) e `gabarito/aula-0X/` (estado ao fim de cada aula, cada um passa no `mvn verify`)
 - /projetos/projeto-final-grupo — `brief-alunos.md`, descrição do projeto final e da banca
 
@@ -32,7 +34,8 @@ Pilha: **Java 21** e **Quarkus 3.15.7**, com Maven pelo Nexus. Não precisa de D
 
 Como usar
 1. Antes da Aula 1, rode o checklist em /ambiente na sua máquina da rede corporativa e devolva o resultado no canal da turma.
-2. Acesse /plano-de-aulas a cada aula para ler o conteúdo, a fim de praticar juntos, com foco nas discussões e práticas.
-3. Acompanhe o projeto guiado sendo desenvolvido a cada aula (compartilhamento de tela com o código) e use o gabarito para estudar, comparar com o seu código ou retomar se algo travar.
+2. Em cada aula, começamos por um problema no projeto hands-on: você tenta resolver na sua máquina e depois codificamos juntos. Se faltou a uma aula, parta do código de /projetos/projeto-hands-on para tentar o problema da aula seguinte.
+3. Acesse /plano-de-aulas a cada aula para ler o conteúdo, a fim de praticar juntos, com foco nas discussões e práticas.
+4. Acompanhe o projeto guiado, lido em aula a partir do gabarito, e use-o para estudar, comparar com o seu código ou retomar se algo travar.
 
 Módulo anterior desta turma: be-jv-010 — repositório `jessehaniel85/1751-be-jv-010`.
