@@ -4,7 +4,7 @@
 >
 > Todo o código citado vem de um **projeto de demonstração** (`demo-cdi`, pacote `tech.ada.demo.cdi`), compilado e testado no Quarkus 3.15.7 com Java 21. Ele **não** faz parte do gabarito. As saídas mostradas são de execuções reais da suíte (`mvn verify`: 12 testes, 0 falhas).
 >
-> As pausas de sempre: 🎬 **Imagine o cenário**, 💭 **Pare e reflita** e ✍️ **Experimente agora**.
+> As pausas de sempre: 🎬 **Imagine o cenário** e 💭 **Pare e reflita**.
 
 ---
 
@@ -253,8 +253,8 @@ O teste `dependentDaUmaInstanciaPorPontoDeInjecao` confirma que `ConsultaDeChave
 
 **Para quem vem do Spring.** O `@Dependent` equivale ao `prototype` do Spring, com uma diferença: no Spring, o contêiner não chama os *callbacks* de destruição de um `prototype`; no CDI, o `@Dependent` é destruído junto com o dono. E a **armadilha** é o padrão: no Spring, bean sem `@Scope` é `singleton`; no CDI, produtor sem escopo é `@Dependent`. Um `@Bean` "caro" (um cliente HTTP, um *pool*) convertido para `@Produces` sem escopo vira uma instância **por ponto de injeção**. Se a intenção era uma só, declare `@ApplicationScoped` (ou `@Singleton`) no método produtor.
 
-> ✍️ **Experimente agora**
-> No seu projeto, crie um produtor de `Clock` sem escopo e injete-o em dois beans. Escreva um teste que compare `System.identityHashCode(...)` das duas instâncias. Depois anote o produtor com `@Singleton` e rode de novo.
+> 💭 **Pare e reflita**
+> Um produtor de `Clock` sem escopo é injetado em dois beans. Os dois recebem a mesma instância ou instâncias diferentes? E se o produtor for anotado com `@Singleton`? Responda antes de reler a tabela da seção 2.
 
 > **Da 3.15 até a 3.40** — sem mudança relevante até a 3.40 no escopo padrão.
 
