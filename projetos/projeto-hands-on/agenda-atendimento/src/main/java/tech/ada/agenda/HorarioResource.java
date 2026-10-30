@@ -1,5 +1,6 @@
 package tech.ada.agenda;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -22,12 +23,17 @@ public class HorarioResource {
   private static final LocalTime HORARIO_ENCERRAMENTO = LocalTime.of(16, 0);
   private static final int TEMPO_SESSAO = 30;
 
+  @Inject
+  AgendamentoService service;
+
   @GET
   public HorariosDoDia listar(@PathParam("codigo") String agencia,
     @QueryParam("data") LocalDate data) {//ISO 8601 -> yyyy-MM-dd
     LocalDate dataHorario = Optional.ofNullable(data)
       .orElseGet(() -> LocalDate.now().plusDays(1));
-    return new HorariosDoDia(agencia, dataHorario, horariosDoExpediente());
+    List<LocalTime> livres = horariosDoExpediente();
+    livres.removeAll(service.horariosOcupados(agencia, dataHorario));
+    return new HorariosDoDia(agencia, dataHorario, livres);
   }
 
   private List<LocalTime> horariosDoExpediente() {

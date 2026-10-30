@@ -357,6 +357,8 @@ com @Unremovable  → AuditoriaDeChaves é bean? true
 
 > **Da 3.15 até a 3.40** — sem mudança relevante até a 3.40 no CDI, nos escopos e na remoção de beans não usados.
 
+**Para aprofundar (opcional):** quantas instâncias existem, como as requisições concorrentes usam o mesmo bean, o escopo padrão `@Dependent` e a diferença entre estado compartilhado e idempotência estão na leitura complementar [`complemento-aula-02-cdi.md`](complemento-aula-02-cdi.md).
+
 ---
 
 ## 7. OpenAPI e Swagger UI
