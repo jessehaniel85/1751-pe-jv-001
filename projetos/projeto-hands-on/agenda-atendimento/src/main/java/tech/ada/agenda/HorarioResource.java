@@ -18,9 +18,9 @@ import java.util.Optional;
 @Produces(MediaType.APPLICATION_JSON)
 public class HorarioResource {
 
-  private static final LocalTime HORARIO_ABERTURA = LocalTime.of(8, 0);
-  private static final LocalTime HORARIO_ENCERRAMENTO = LocalTime.of(18, 0);
-  private static final int TEMPO_SESSAO = 45;
+  private static final LocalTime HORARIO_ABERTURA = LocalTime.of(10, 0);
+  private static final LocalTime HORARIO_ENCERRAMENTO = LocalTime.of(16, 0);
+  private static final int TEMPO_SESSAO = 30;
 
   @GET
   public HorariosDoDia listar(@PathParam("codigo") String agencia,
