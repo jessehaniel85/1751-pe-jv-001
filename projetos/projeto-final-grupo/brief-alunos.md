@@ -46,6 +46,8 @@ O esforço acompanha o tamanho do grupo. **O CORE é obrigatório**; cada integr
 - **README** e **AVALIACAO.md** conforme a seção 3.
 - **Roda sem Docker**: dois serviços locais (portas 8080 e 8081), H2 em memória, `mvn verify` verde.
 
+**PostgreSQL é opcional.** O grupo pode usar PostgreSQL com Docker e migrações versionadas (Flyway ou Liquibase), como na seção 10 do material da Aula 3. É o que vocês vão encontrar nos serviços de verdade.
+
 **Opcionais (+1 por integrante acima de 3):**
 - **Terceiro serviço** ou segunda integração entre serviços, também com Fault Tolerance.
 - **OpenAPI** bem documentada (descrições e exemplos) com Swagger UI.

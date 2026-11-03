@@ -3,3 +3,5 @@ target/
 .idea/
 *.iml
 .local/
+# Aula 3: banco H2 em arquivo do perfil dev do hands-on
+projetos/projeto-hands-on/**/data/

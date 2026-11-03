@@ -1,6 +1,6 @@
 # Material do Aluno — Aula 3: Hibernate ORM com Panache
 
-> **Tempo de leitura:** ~20 min. Desligue o dev mode da Aula 2 e suba de novo: as chaves que você cadastrou sumiram, porque moravam num `Map`. Hoje elas vão para um banco (H2 em memória, sem Docker) com **Hibernate ORM** e **Panache**. O Hibernate você já conhece do Spring Data JPA; o Panache é a camada do Quarkus que tira a repetição. O que ele **não** tira é a responsabilidade pela transação, e é aí que mora a maior parte dos defeitos desta aula.
+> **Tempo de leitura:** ~20 min. Desligue o dev mode da Aula 2 e suba de novo: as chaves que você cadastrou sumiram, porque moravam num `Map`. Hoje elas vão para um banco (H2, sem Docker) com **Hibernate ORM** e **Panache**. Atenção: com o H2 **em memória**, o banco também some quando a aplicação reinicia. A seção 10 mostra como guardar em arquivo e como chegar a migrações versionadas e ao PostgreSQL; em produção, muda a URL do banco, e o código Panache é o mesmo. O Hibernate você já conhece do Spring Data JPA; o Panache é a camada do Quarkus que tira a repetição. O que ele **não** tira é a responsabilidade pela transação, e é aí que mora a maior parte dos defeitos desta aula.
 >
 > As três pausas de sempre: 🎬 **Imagine o cenário**, 💭 **Pare e reflita** e ✍️ **Experimente agora**.
 
@@ -48,10 +48,10 @@ Datasource '<default>' is not configured. To solve this, configure datasource '<
 Press [space] to restart, [e] to edit command line args (currently ''), [r] to resume testing, [o] Toggle test output, [h] for more options>
 ```
 
-Três detalhes da configuração:
+Quatro detalhes da configuração:
 
 - `DB_CLOSE_DELAY=-1` mantém o banco em memória vivo enquanto a JVM existir, mesmo sem conexão aberta.
-- `database.generation=drop-and-create` recria as tabelas a cada subida. Sem os Dev Services, o padrão é `none`: tiramos a linha, o log acusou `Schema-validation: missing table [ChavePix]` e o `GET /chaves` respondeu 500.
+- `database.generation=drop-and-create` recria as tabelas a cada subida (por isso, mesmo com o banco em arquivo, os dados sumiriam: seção 10). Sem os Dev Services, o padrão é `none`: tiramos a linha, o log acusou `Schema-validation: missing table [ChavePix]` e o `GET /chaves` respondeu 500.
 - `%dev.` no começo da chave quer dizer "só no perfil dev". Perfis voltam com tudo na Aula 4.
 - Não há linha para o `import.sql`, e é de propósito: o padrão de `quarkus.hibernate-orm.sql-load-script` já é `import.sql` em dev e test e **nada** em produção. Escrever `quarkus.hibernate-orm.sql-load-script=import.sql` sem perfil faria os dados de exemplo entrarem também no jar de produção.
 
@@ -413,6 +413,8 @@ Repare: o teste **injeta o repositório** com `@Inject`, como qualquer bean. Sa�
 | `spring.jpa.hibernate.ddl-auto` | `quarkus.hibernate-orm.database.generation` |
 | `spring.jpa.show-sql` | `quarkus.hibernate-orm.log.sql` |
 | `data.sql` | `import.sql` |
+| `CommandLineRunner` / `ApplicationRunner` | método com `@Observes StartupEvent` (seção 10) |
+| `spring.flyway.*` / `spring.liquibase.*` | extensões `quarkus-flyway` / `quarkus-liquibase` (seção 10) |
 | `org.springframework.transaction.annotation.Transactional` | `jakarta.transaction.Transactional` |
 | `rollbackFor` | `rollbackOn` |
 | Chamada interna (`this.metodo()`) **não** passa pelo proxy | Chamada interna **passa** pelo interceptor |
@@ -422,12 +424,184 @@ Repare: o teste **injeta o repositório** com `@Inject`, como qualquer bean. Sa�
 
 ---
 
+## 10. Para ir além: dados que sobrevivem, migrações e PostgreSQL
+
+> 🎬 **Imagine o cenário**
+> O serviço da Agenda foi reiniciado à noite para uma atualização. De manhã, o atendente abre a agenda do dia e não acha nenhum agendamento. Na aula, os agendamentos foram para o H2 em memória, e o problema continua: o banco morava dentro do processo. Como guardar de verdade? E quando o time mudar a tabela, como a mudança chega ao banco de produção sem ninguém rodar SQL à mão?
+
+Tudo nesta seção foi verificado em 03/11/2026, no projeto da Agenda, com Quarkus 3.15.7 e JDK 21.
+
+### 10.1. H2 em arquivo, passo a passo
+
+Três tentativas, cada uma com um `POST`, um reinício do dev mode (`s`) e um `GET /agendamentos`:
+
+| Configuração no perfil dev | Depois do reinício |
+|---|---|
+| H2 em memória (a da aula) | `[]` |
+| `%dev.quarkus.datasource.jdbc.url=jdbc:h2:file:./data/agenda`, ainda com `drop-and-create` | `[]`, embora o arquivo `data/agenda.mv.db` exista |
+| o mesmo arquivo + `%dev.quarkus.hibernate-orm.database.generation=update` | o agendamento continua lá |
+
+O `drop-and-create` derruba e recria as tabelas a cada subida, em memória ou em arquivo. O `update` só acrescenta o que falta. Os testes seguem com a configuração sem perfil (memória, `drop-and-create`): cada `mvn verify` começa do zero. Ponha a pasta `data/` no `.gitignore`.
+
+Dois efeitos que aparecem no log e nos dados:
+
+- Depois do reinício, o próximo `POST` ganhou o id **51**: o bloco de 50 ids reservado antes do reinício se perdeu (seção 7.1).
+- A cada subida, o `update` derruba e recria a restrição única (`drop constraint if exists UK...` e `add constraint UK... unique (agencia, data, horario)`). E ele nunca remove nem renomeia coluna. Serve para desenvolver; **não** para produção.
+
+> 💭 **Pare e reflita**
+> Com `update`, o `import.sql` **não rodou**, nem na primeira subida com o banco vazio: ele só roda quando o esquema é gerado do zero. De onde vêm, então, os dados de exemplo do ambiente de desenvolvimento?
+
+### 10.2. Dados de exemplo por código: o `CommandLineRunner` do Quarkus
+
+```java
+// Dados de exemplo só no perfil dev, e só se o banco estiver vazio (o banco em arquivo sobrevive ao reinício).
+@IfBuildProfile("dev")
+@ApplicationScoped
+public class DadosDeExemplo {
+
+  private final AgendamentoRepository repository;
+
+  public DadosDeExemplo(AgendamentoRepository repository) {
+    this.repository = repository;
+  }
+
+  @Transactional
+  void carregar(@Observes StartupEvent evento) {
+    if (repository.count() > 0) {
+      return;
+    }
+    Agendamento agendamento = new Agendamento();
+    agendamento.agencia = "0001";
+    agendamento.data = LocalDate.now().plusDays(1);
+    agendamento.horario = LocalTime.of(10, 0);
+    agendamento.clienteCpf = "11144477735";
+    repository.persist(agendamento);
+  }
+}
+```
+
+O método roda na subida, como um `CommandLineRunner`. Resultado: o agendamento de exemplo entrou na primeira subida e **não** se repetiu no reinício.
+
+### 10.3. Migrações versionadas: Flyway (ou Liquibase)
+
+Em produção, quem cria e altera as tabelas é uma **migração versionada**: um arquivo SQL numerado, guardado no Git, aplicado uma vez em cada banco. O Quarkus tem extensão oficial para as duas ferramentas mais usadas, Flyway e Liquibase. Exemplo com Flyway na Agenda:
+
+```bash
+mvn quarkus:add-extension -Dextensions='quarkus-flyway'
+```
+
+```properties
+quarkus.flyway.migrate-at-start=true
+# O esquema vem das migrações; o Hibernate só confere se a entidade bate com a tabela.
+quarkus.hibernate-orm.database.generation=validate
+# Dados de exemplo só no perfil dev, numa pasta de migrações à parte.
+%dev.quarkus.flyway.locations=db/migration,db/dados-dev
+```
+
+`src/main/resources/db/migration/V1__cria_agendamento.sql`:
+
+```sql
+create sequence Agendamento_SEQ start with 1 increment by 50;
+
+create table Agendamento (
+    id bigint not null,
+    agencia varchar(255) not null,
+    clienteCpf varchar(255) not null,
+    data date not null,
+    horario time(6) not null,
+    primary key (id),
+    constraint uk_agendamento_horario unique (agencia, data, horario)
+);
+```
+
+`src/main/resources/db/dados-dev/V1_1__agendamentos_de_exemplo.sql`:
+
+```sql
+insert into Agendamento (id, agencia, clienteCpf, data, horario)
+values (next value for Agendamento_SEQ, '0001', '11144477735', '2026-11-05', '09:00');
+```
+
+Saída real do dev mode (H2 em arquivo), na primeira subida:
+
+```
+Migrating schema "PUBLIC" to version "1 - cria agendamento"
+Migrating schema "PUBLIC" to version "1.1 - agendamentos de exemplo"
+Successfully applied 2 migrations to schema "PUBLIC", now at version v1.1
+```
+
+E na segunda: `Schema "PUBLIC" is up to date. No migration necessary.`, com os dados no lugar. A suíte (19 testes, em memória) passou: o Flyway cria a tabela também nos testes.
+
+O `validate` é a rede de proteção. Acrescentamos um campo `observacao` à entidade **sem** escrever a migração, e a aplicação não subiu:
+
+```
+Schema-validation: missing column [observacao] in table [Agendamento]
+```
+
+A correção é uma `V2__...sql` com o `alter table`, nunca editar a `V1` que já rodou.
+
+**Liquibase** faz o mesmo papel com um *changelog* (`db/changeLog.xml` por padrão) e `quarkus.liquibase.migrate-at-start=true`. A extensão `quarkus-liquibase` está na plataforma 3.15.7; não montamos exemplo.
+
+> 💭 **Pare e reflita**
+> Qual das duas o seu time usa? Onde ficam os scripts, e quem os aplica em produção: a própria aplicação na subida (`migrate-at-start`) ou o pipeline, antes do deploy?
+
+### 10.4. PostgreSQL com Docker
+
+Fora da rede corporativa, com Docker na máquina, dá para usar o mesmo banco da produção. O código Panache não muda; mudam as extensões e a configuração:
+
+```bash
+mvn quarkus:add-extension -Dextensions='quarkus-jdbc-postgresql,quarkus-flyway-postgresql'
+```
+
+(o `quarkus-flyway-postgresql` vai **ao lado** do `quarkus-flyway`; sozinho, a configuração do Flyway foi ignorada e a tabela não existia.) Tire o `quarkus-jdbc-h2`, e então há dois caminhos.
+
+**Dev Services (dev e test):** declare só o tipo do banco, sem URL, e deixe os Dev Services ligados (é o padrão):
+
+```properties
+quarkus.datasource.db-kind=postgresql
+```
+
+O Quarkus sobe um contêiner sozinho. Saída real:
+
+```
+Dev Services for default datasource (postgresql) started
+Database: jdbc:postgresql://localhost:58323/quarkus (PostgreSQL 14.24)
+```
+
+**`docker run` (o banco é seu):**
+
+```bash
+docker run -d --name agenda-pg -e POSTGRES_DB=agenda -e POSTGRES_USER=agenda -e POSTGRES_PASSWORD=agenda -p 55432:5432 postgres:14
+```
+
+```properties
+%prod.quarkus.datasource.jdbc.url=${AGENDA_DB_URL:jdbc:postgresql://localhost:55432/agenda}
+```
+
+Usuário e senha por variável de ambiente (`QUARKUS_DATASOURCE_USERNAME`, `QUARKUS_DATASOURCE_PASSWORD`), nunca no arquivo. O jar aplicou a `V1`, aceitou o `POST` e não carregou os dados de exemplo: o perfil `prod` não lê a pasta `db/dados-dev`.
+
+A mesma `V1__cria_agendamento.sql` rodou no H2 e no PostgreSQL. O script de dados, não: `next value for Agendamento_SEQ` (H2) virou `nextval('Agendamento_SEQ')` no PostgreSQL.
+
+**Docker 29 com Quarkus 3.15.** O Testcontainers que vem na 3.15.7 foi recusado pelo Docker Engine 29 (`Could not find a valid Docker environment`, com `Status 400`). Contorno que funcionou:
+
+```bash
+mvn verify -DargLine="-Dapi.version=1.44"
+MAVEN_OPTS="-Dapi.version=1.44" mvn quarkus:dev -Djvm.args="-Dapi.version=1.44"
+```
+
+> 💭 **Pare e reflita**
+> Os testes da aula rodam no H2, e a produção do seu time roda em outro banco. O script de dados acima já mostrou uma diferença de SQL entre os dois. Que tipo de defeito passa no H2 e só aparece no banco de verdade?
+
+> **Da 3.15 até a 3.40** — Na **3.23**, `quarkus.hibernate-orm.database.generation` passa a se chamar `quarkus.hibernate-orm.schema-management.strategy` (vale também para o `validate` e o `update` desta seção). O contorno do Docker 29 foi verificado só na 3.15.7.
+
+---
+
 **✍️ Desafio da aula**
 
 1. Tenha o `chaves-pix` com H2 e Panache rodando (copie do `gabarito/aula-03/` se precisar).
 2. Acrescente ao repositório `findByTipo(TipoChave tipo)` e exponha `GET /chaves?tipo=EMAIL`, combinável com `titular`, com teste.
 3. Escreva um teste no `ChavePixRepositoryTest` para `countByConta` numa conta que **o próprio teste** criou.
 4. Aprofundamento (opcional): refaça o experimento da exceção verificada (seção 6, item 3) no seu projeto e explique o resultado para alguém do grupo, com e sem `rollbackOn`.
+5. Aprofundamento (opcional): na Agenda, troque o `update` do perfil dev por Flyway (seção 10.3) e quebre o `validate` com um campo sem migração. Com Docker em casa, tente o PostgreSQL (seção 10.4).
 
 **Para ir além** (guias da versão 3.15)
 
@@ -435,6 +609,9 @@ Repare: o teste **injeta o repositório** com `@Inject`, como qualquer bean. Sa�
 - Hibernate ORM no Quarkus (`database.generation`, `import.sql`, log de SQL): https://quarkus.io/version/3.15/guides/hibernate-orm
 - Datasources (H2, URL, Dev Services): https://quarkus.io/version/3.15/guides/datasource
 - Transações (`@Transactional`, `rollbackOn`, `QuarkusTransaction`): https://quarkus.io/version/3.15/guides/transaction
+- Flyway: https://quarkus.io/version/3.15/guides/flyway
+- Liquibase: https://quarkus.io/version/3.15/guides/liquibase
+- Dev Services de banco: https://quarkus.io/version/3.15/guides/databases-dev-services
 
 **Para levar ao projeto final**
 
@@ -442,6 +619,7 @@ Repare: o teste **injeta o repositório** com `@Inject`, como qualquer bean. Sa�
 - Registre no README do grupo: Active Record ou Repository, e por quê.
 - `@Transactional` do Jakarta nos métodos de escrita do serviço; exceções de negócio não verificadas (ou `rollbackOn`).
 - Restrição única no banco para o que não pode duplicar.
+- Opcional: esquema por migração versionada (Flyway, seção 10.3) e PostgreSQL com Docker (seção 10.4), como nos serviços de verdade.
 - Quem está portando o projeto do módulo anterior: liste as consultas derivadas do Spring Data que viraram método escrito.
 
 > **Na próxima aula:** o limite de 5 chaves por conta está numa constante. Se a regra mudar amanhã, quanto tempo leva para chegar à produção? E como a plataforma sabe que o serviço está **pronto**, e não só **vivo**?
