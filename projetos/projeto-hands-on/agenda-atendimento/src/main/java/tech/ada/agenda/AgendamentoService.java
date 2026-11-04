@@ -1,6 +1,7 @@
 package tech.ada.agenda;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -12,10 +13,7 @@ public class AgendamentoService {
 
   private final AgendamentoRepository repository;
 
-//  public AgendamentoService(AgendamentoRepository repository) {
-//    this.repository = repository;
-//  }
-
+  @Transactional
   public Agendamento agendar(NovoAgendamentoRequest request) {
     this.exigirHorarioLivre(request.agencia(), request.data(), request.horario(), null);
     Agendamento agendamento = new Agendamento();
@@ -45,6 +43,11 @@ public class AgendamentoService {
     return repository.findByIdOptional(id).orElseThrow(() -> new AgendamentoNaoEncontradoException(id));
   }
 
+  public List<Agendamento> agendaDoDia(String agencia, LocalDate data) {
+    return repository.findByAgenciaEData(agencia, data);
+  }
+
+  @Transactional
   public Agendamento remarcar(Long id, RemarcacaoRequest request) {
     Agendamento agendamento = buscar(id);
     this.exigirHorarioLivre(agendamento.getAgencia(), request.data(), request.horario(), id);
@@ -53,6 +56,7 @@ public class AgendamentoService {
     return agendamento;
   }
 
+  @Transactional
   public void cancelar(Long id) {
     if (!repository.deleteById(id)) {
       throw new AgendamentoNaoEncontradoException(id);

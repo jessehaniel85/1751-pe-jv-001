@@ -1,58 +1,31 @@
 package tech.ada.agenda;
 
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @ApplicationScoped
-public class AgendamentoRepository {
-
-  //persistência em memória
-  private final Map<Long, Agendamento> agendamentos = new ConcurrentHashMap<>();
-  private final AtomicLong sequencia = new AtomicLong(0L);
-
-  public void persist(Agendamento agendamento) {
-    agendamento.setId(sequencia.incrementAndGet());//++sequencia
-    agendamentos.put(agendamento.getId(), agendamento);
-  }
-
-  public Optional<Agendamento> findByIdOptional(Long id) {
-    return Optional.ofNullable(agendamentos.get(id));
-  }
-
-  public List<Agendamento> listAll() {
-    return List.copyOf(agendamentos.values());
-  }
+public class AgendamentoRepository implements PanacheRepository<Agendamento> {
 
   public List<Agendamento> findByCliente(String clienteCpf) {
-    return agendamentos.values().stream()
-      .filter(agendamento -> agendamento.getClienteCpf().equals(clienteCpf))
-      .toList();
+    return list("clienteCpf", clienteCpf);
   }
 
   public Optional<Agendamento> findByHorario(String agencia, LocalDate data, LocalTime horario) {
-    return agendamentos.values().stream()
-      .filter(agendamento -> agendamento.getAgencia().equals(agencia)
-        && agendamento.getData().equals(data)
-        && agendamento.getHorario().equals(horario))
-      .findFirst();
+    return find("agencia = ?1 and data = ?2 and horario = ?3", agencia, data, horario).firstResultOptional();
+  }
+
+  public List<Agendamento> findByAgenciaEData(String agencia, LocalDate data) {
+    return list("agencia = ?1 and data = ?2", agencia, data);
   }
 
   public List<LocalTime> horariosOcupados(String agencia, LocalDate data) {
-    return agendamentos.values().stream()
-      .filter(agendamento -> agendamento.getAgencia().equals(agencia) && agendamento.getData().equals(data))
+    return findByAgenciaEData(agencia, data).stream()
       .map(Agendamento::getHorario)
       .toList();
-  }
-
-  public boolean deleteById(Long id) {
-    return agendamentos.remove(id) != null;
   }
 
 }
