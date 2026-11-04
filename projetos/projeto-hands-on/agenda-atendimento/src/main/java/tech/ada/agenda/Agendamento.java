@@ -1,7 +1,5 @@
 package tech.ada.agenda;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,11 +23,10 @@ import lombok.ToString;
 @Builder
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"agencia", "data", "horario"}))
-public class Agendamento extends PanacheEntityBase {
+public class Agendamento {
 
   @Id
   @GeneratedValue
-  @Column(nullable = false)
   private Long id;
   @Column(nullable = false)
   private String agencia;

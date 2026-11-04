@@ -20,7 +20,16 @@ class AgendamentoRepositoryTest {
   AgendamentoRepository repository;
 
   @Test
+  @TestTransaction
   void findByCliente() {
+    repository.persist(agendamento("0009", LocalTime.of(10, 0)));
+    Agendamento deOutroCliente = agendamento("0009", LocalTime.of(10, 30));
+    deOutroCliente.setClienteCpf("529.982.247-25");
+    repository.persist(deOutroCliente);
+
+    List<Agendamento> encontrados = repository.findByCliente("605.198.540-98");
+    assertEquals(1, encontrados.size());
+    assertEquals(LocalTime.of(10, 0), encontrados.get(0).getHorario());
   }
 
   @Test
@@ -50,7 +59,6 @@ class AgendamentoRepositoryTest {
     assertThrows(PersistenceException.class,
       () -> repository.persistAndFlush(agendamento("0007", LocalTime.of(11, 0))));
   }
-
 
   private static Agendamento agendamento(String agencia, LocalTime horario) {
     return Agendamento.builder()

@@ -1,6 +1,7 @@
 package tech.ada.agenda;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,7 @@ public class AgendamentoRepository implements PanacheRepository<Agendamento> {
   }
 
   public List<Agendamento> findByAgenciaEData(String agencia, LocalDate data) {
-    return list("agencia = ?1 and data = ?2", agencia, data);
+    return list("agencia = ?1 and data = ?2", Sort.by("horario"), agencia, data);
   }
 
   public List<LocalTime> horariosOcupados(String agencia, LocalDate data) {
