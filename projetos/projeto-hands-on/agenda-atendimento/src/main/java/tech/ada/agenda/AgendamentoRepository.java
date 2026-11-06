@@ -29,4 +29,7 @@ public class AgendamentoRepository implements PanacheRepository<Agendamento> {
       .toList();
   }
 
+  public long countByClient(String clienteCpf) {
+    return count("clienteCpf", clienteCpf);
+  }
 }

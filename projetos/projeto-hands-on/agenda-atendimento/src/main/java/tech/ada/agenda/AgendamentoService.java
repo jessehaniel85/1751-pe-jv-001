@@ -12,10 +12,12 @@ import lombok.RequiredArgsConstructor;
 public class AgendamentoService {
 
   private final AgendamentoRepository repository;
+  private final AgendaConfig agendaConfig;
 
   @Transactional
   public Agendamento agendar(NovoAgendamentoRequest request) {
     this.exigirHorarioLivre(request.agencia(), request.data(), request.horario(), null);
+    this.exigirVagaDoCliente(request.clienteCpf());
     Agendamento agendamento = new Agendamento();
     agendamento.setAgencia(request.agencia());
     agendamento.setClienteCpf(request.clienteCpf());
@@ -33,6 +35,13 @@ public class AgendamentoService {
       .ifPresent(ocupante -> {
         throw new HorarioOcupadoException(agencia, data, horario);
       });
+  }
+
+  private void exigirVagaDoCliente(String clienteCpf) {
+    final var limitePorCliente = this.agendaConfig.limitePorCliente();
+    if (this.repository.countByClient(clienteCpf) >= limitePorCliente) {
+      throw new LimiteDeAgendamentoException(clienteCpf, limitePorCliente);
+    }
   }
 
   public List<Agendamento> listar(String clienteCpf) {

@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import tech.ada.agenda.AgendaConfig.Expediente;
 
 //Quais horários a agência tem livres amanhã ou numa data específica?
 //GET /agencias/{codigo}/horarios?data=
@@ -19,12 +20,11 @@ import java.util.Optional;
 @Produces(MediaType.APPLICATION_JSON)
 public class HorarioResource {
 
-  private static final LocalTime HORARIO_ABERTURA = LocalTime.of(10, 0);
-  private static final LocalTime HORARIO_ENCERRAMENTO = LocalTime.of(16, 0);
-  private static final int TEMPO_SESSAO = 30;
-
   @Inject
   AgendamentoService service;
+
+  @Inject
+  AgendaConfig agendaConfig;
 
   @GET
   public HorariosDoDia listar(@PathParam("codigo") String agencia,
@@ -37,8 +37,9 @@ public class HorarioResource {
   }
 
   private List<LocalTime> horariosDoExpediente() {
+    final Expediente expedientes = agendaConfig.expedientes();
     List<LocalTime> horarios = new ArrayList<>();
-    for (LocalTime hr = HORARIO_ABERTURA; hr.isBefore(HORARIO_ENCERRAMENTO); hr = hr.plusMinutes(TEMPO_SESSAO)) {
+    for (LocalTime hr = expedientes.abertura(); hr.isBefore(expedientes.encerramento()); hr = hr.plusMinutes(expedientes.duracaoMinutos())) {
       horarios.add(hr);
     }
     return horarios;

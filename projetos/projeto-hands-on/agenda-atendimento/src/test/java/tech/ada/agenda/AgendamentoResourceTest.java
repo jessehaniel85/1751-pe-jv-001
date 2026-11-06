@@ -114,6 +114,33 @@ class AgendamentoResourceTest {
   }
 
   @Test
+  void quartoAgendamentoDoMesmoClienteDevolve422() {
+    String agencia = novaAgencia();
+    String cliente = Cpfs.novo();
+    for (String horario : new String[] {"10:00", "10:30", "11:00"}) {
+      given().contentType(ContentType.JSON).body(agendamento(agencia, horario, cliente))
+        .when().post("/agendamentos").then().statusCode(201);
+    }
+    given().contentType(ContentType.JSON).body(agendamento(agencia, "11:30", cliente))
+      .when().post("/agendamentos").then().statusCode(422);
+  }
+
+  @Test
+  void cancelarLiberaVagaDoCliente() {
+    String agencia = novaAgencia();
+    String cliente = Cpfs.novo();
+    String primeiro = null;
+    for (String horario : new String[] {"13:00", "13:30", "14:00"}) {
+      String location = given().contentType(ContentType.JSON).body(agendamento(agencia, horario, cliente))
+        .when().post("/agendamentos").then().statusCode(201).extract().header("Location");
+      primeiro = primeiro == null ? location : primeiro;
+    }
+    given().when().delete(primeiro).then().statusCode(204);
+    given().contentType(ContentType.JSON).body(agendamento(agencia, "14:30", cliente))
+      .when().post("/agendamentos").then().statusCode(201);
+  }
+
+  @Test
   void openApiDocumentaOsEndpoints() {
     given().accept(ContentType.JSON)
       .when().get("/q/openapi")
