@@ -40,7 +40,7 @@ class AgendaDaAgenciaResourceTest {
 
   private static void agendar(String agencia, String data, String horario) {
     given().contentType(ContentType.JSON)
-      .body(Map.of("agencia", agencia, "data", data, "horario", horario, "clienteCpf", "52998224725"))
+      .body(Map.of("agencia", agencia, "data", data, "horario", horario, "clienteCpf", Cpfs.novo()))
       .when().post("/agendamentos")
       .then().statusCode(201);
   }

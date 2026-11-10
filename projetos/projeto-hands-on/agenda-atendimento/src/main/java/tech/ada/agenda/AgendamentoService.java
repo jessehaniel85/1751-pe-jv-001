@@ -1,5 +1,6 @@
 package tech.ada.agenda;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ public class AgendamentoService {
 
   private final AgendamentoRepository repository;
   private final AgendaConfig agendaConfig;
+  private final MeterRegistry registry;
 
   @Transactional
   public Agendamento agendar(NovoAgendamentoRequest request) {
@@ -25,6 +27,8 @@ public class AgendamentoService {
     agendamento.setData(request.data());
     //persistir pelo repositorio
     this.repository.persist(agendamento);
+    // Aula 4: métrica de negócio. Tag agencia: quantos valores ela pode ter? (cardinalidade, ver aula-04.md)
+    this.registry.counter("agenda.agendamentos.criados", "agencia", agendamento.getAgencia()).increment();
     return agendamento;
   }
 

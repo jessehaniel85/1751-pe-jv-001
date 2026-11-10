@@ -37,7 +37,7 @@ public class HorarioResource {
   }
 
   private List<LocalTime> horariosDoExpediente() {
-    final Expediente expedientes = agendaConfig.expedientes();
+    final Expediente expedientes = agendaConfig.expediente();
     List<LocalTime> horarios = new ArrayList<>();
     for (LocalTime hr = expedientes.abertura(); hr.isBefore(expedientes.encerramento()); hr = hr.plusMinutes(expedientes.duracaoMinutos())) {
       horarios.add(hr);

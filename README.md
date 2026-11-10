@@ -24,7 +24,7 @@ Cronograma (Seg/Qua/Sex, 15h–18h, pelo Teams; sem aula em 02/11)
 | 2 | Sex 30/10 | Quarkus REST, CDI e OpenAPI |
 | 3 | Qua 04/11 | Hibernate ORM com Panache |
 | 4 | Sex 06/11 | Configuração, health e métricas |
-| 5 | Seg 09/11 | REST Client e Fault Tolerance |
+| 5 | Ter 10/11 (reposição da Seg 09/11) | REST Client e Fault Tolerance |
 | 6 | Qua 11/11 | Validação e tratamento de erros |
 | 7 | Sex 13/11 | Autenticação |
 | 8 | Seg 16/11 | Autorização |

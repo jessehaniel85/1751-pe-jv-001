@@ -1,6 +1,6 @@
 # Material do Aluno — Aula 5: Serviços que conversam (REST Client e Fault Tolerance)
 
-> **Segunda, 09/11/2026 · Tempo de leitura:** ~15 min. Até aqui o `chaves-pix` vivia sozinho. Hoje ele ganha um vizinho, o serviço de `contas`, e passa a depender dele para cadastrar uma chave. Isso traz uma pergunta que nenhuma aula anterior precisou responder: **o que a API faz quando o outro serviço demora ou cai?** No fim da aula, o instrutor também demonstra a imagem nativa do Quarkus, para você entender o que ela é e quando vale a pena.
+> **Terça, 10/11/2026 (reposição da aula de segunda, 09/11) · Tempo de leitura:** ~15 min. Até aqui o `chaves-pix` vivia sozinho. Hoje ele ganha um vizinho, o serviço de `contas`, e passa a depender dele para cadastrar uma chave. Isso traz uma pergunta que nenhuma aula anterior precisou responder: **o que a API faz quando o outro serviço demora ou cai?** No fim da aula, você também conhece a imagem nativa do Quarkus: o que ela é e quando vale a pena.
 
 ---
 
@@ -304,7 +304,7 @@ HTTP/1.1 503 Service Unavailable
 
 ---
 
-## 6. Imagem nativa: o que o instrutor vai demonstrar
+## 6. Imagem nativa: o que é e quando vale a pena
 
 Até agora, toda aplicação Quarkus que você rodou foi um `quarkus-run.jar` numa JVM. A **imagem nativa** é outra forma de empacotar a mesma aplicação: a ferramenta `native-image`, da GraalVM, compila o código Java **antes da execução** (compilação AOT, *ahead-of-time*) e gera um executável do sistema operacional, que roda sem JVM.
 
@@ -322,15 +322,15 @@ Modo nativo:  código ─► .class ─► native-image analisa tudo no build �
 
 **O que o build exige** (guia `building-native-image` do Quarkus 3.15): uma GraalVM ou Mandrel para JDK 21 com `GRAALVM_HOME` configurado, **e** um compilador C com as bibliotecas do sistema (no Linux, GCC e os headers de glibc e zlib; no macOS, as Xcode Command Line Tools; no Windows, as ferramentas de build do Visual Studio com C++). A alternativa de compilar dentro de um contêiner (`-Dquarkus.native.container-build=true`) exige Docker ou Podman.
 
-Por isso, **na rede corporativa você acompanha a demonstração do instrutor**, feita na máquina dele com o binário compilado antes da aula. O comando que ele usou parte do perfil `native` que o plugin já gerou no seu `pom.xml`:
+Por isso, **na rede corporativa a imagem nativa fica no conceito**: nesta turma não há build nativo nem demonstração. Numa máquina com esses requisitos, o comando parte do perfil `native` que o plugin já gerou no seu `pom.xml`:
 
 ```bash
 mvn install -Dnative -DskipTests
 ```
 
-Os números da comparação (tempo de build, tamanho, subida, memória) saem da demonstração, medidos ao vivo na mesma máquina. Não use números de blog: dependem do hardware, do projeto e da versão.
+Uma comparação honesta (tempo de build, tamanho, subida, memória) se mede na mesma máquina, com o mesmo projeto, nos dois modos. Não use números de blog: dependem do hardware, do projeto e da versão.
 
-✍️ **Experimente agora.** Meça o seu modo JVM para comparar com os números nativos da demo:
+✍️ **Experimente agora.** Meça o seu modo JVM; é o lado da comparação que você consegue medir aqui:
 
 ```bash
 mvn package -DskipTests

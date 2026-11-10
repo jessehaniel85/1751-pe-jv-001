@@ -6,7 +6,7 @@ import java.time.LocalTime;
 @ConfigMapping(prefix = "agenda")
 public interface AgendaConfig {
 
-  Expediente expedientes();
+  Expediente expediente();
 
   int limitePorCliente();
 

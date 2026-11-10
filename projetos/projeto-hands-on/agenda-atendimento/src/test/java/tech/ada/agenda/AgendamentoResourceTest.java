@@ -15,19 +15,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 /**
- * Um teste por endpoint e por caminho de erro. Cada teste usa uma agência própria, então a ordem não importa.
+ * Um teste por endpoint e por caminho de erro. Cada teste usa uma agência e um CPF próprios, então a ordem não importa.
  */
 @QuarkusTest
 class AgendamentoResourceTest {
 
-  private static final String CLIENTE = "52998224725";
   private static final String DATA = "2026-12-01";
   private static final AtomicInteger AGENCIAS = new AtomicInteger(7000);
 
   @Test
   void postAgendaE201ComLocation() {
     String agencia = novaAgencia();
-    String location = given().contentType(ContentType.JSON).body(agendamento(agencia, "10:00", CLIENTE))
+    String location = given().contentType(ContentType.JSON).body(agendamento(agencia, "10:00", Cpfs.novo()))
       .when().post("/agendamentos")
       .then().statusCode(201)
       .header("Location", matchesRegex(".*/agendamentos/\\d+"))
@@ -41,15 +40,15 @@ class AgendamentoResourceTest {
   @Test
   void postNoHorarioOcupadoDevolve409() {
     String agencia = novaAgencia();
-    given().contentType(ContentType.JSON).body(agendamento(agencia, "10:30", CLIENTE))
+    given().contentType(ContentType.JSON).body(agendamento(agencia, "10:30", Cpfs.novo()))
       .when().post("/agendamentos").then().statusCode(201);
-    given().contentType(ContentType.JSON).body(agendamento(agencia, "10:30", "11144477735"))
+    given().contentType(ContentType.JSON).body(agendamento(agencia, "10:30", Cpfs.novo()))
       .when().post("/agendamentos").then().statusCode(409);
   }
 
   @Test
   void getListaComFiltroPorCpf() {
-    String outroCliente = "11144477735";
+    String outroCliente = Cpfs.novo();
     String agencia = novaAgencia();
     given().contentType(ContentType.JSON).body(agendamento(agencia, "11:00", outroCliente))
       .when().post("/agendamentos").then().statusCode(201);
@@ -75,7 +74,7 @@ class AgendamentoResourceTest {
       .when().put(location)
       .then().statusCode(200)
       .body("horario", equalTo("14:00:00"));
-    given().contentType(ContentType.JSON).body(agendamento(agencia, "13:00", "11144477735"))
+    given().contentType(ContentType.JSON).body(agendamento(agencia, "13:00", Cpfs.novo()))
       .when().post("/agendamentos").then().statusCode(201);
   }
 
@@ -151,7 +150,7 @@ class AgendamentoResourceTest {
   }
 
   private static String agendar(String agencia, String horario) {
-    return given().contentType(ContentType.JSON).body(agendamento(agencia, horario, CLIENTE))
+    return given().contentType(ContentType.JSON).body(agendamento(agencia, horario, Cpfs.novo()))
       .when().post("/agendamentos")
       .then().statusCode(201)
       .extract().header("Location");
