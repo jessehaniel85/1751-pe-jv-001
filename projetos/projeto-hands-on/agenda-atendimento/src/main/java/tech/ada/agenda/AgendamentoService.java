@@ -15,9 +15,11 @@ public class AgendamentoService {
   private final AgendamentoRepository repository;
   private final AgendaConfig agendaConfig;
   private final MeterRegistry registry;
+  private final CalendarioGateway calendarioGateway;
 
   @Transactional
   public Agendamento agendar(NovoAgendamentoRequest request) {
+    this.exigirDiaDeAtendimento(request.agencia(), request.data());
     this.exigirHorarioLivre(request.agencia(), request.data(), request.horario(), null);
     this.exigirVagaDoCliente(request.clienteCpf());
     Agendamento agendamento = new Agendamento();
@@ -30,6 +32,13 @@ public class AgendamentoService {
     // Aula 4: métrica de negócio. Tag agencia: quantos valores ela pode ter? (cardinalidade, ver aula-04.md)
     this.registry.counter("agenda.agendamentos.criados", "agencia", agendamento.getAgencia()).increment();
     return agendamento;
+  }
+
+  private void exigirDiaDeAtendimento(String agencia, LocalDate data) {
+    final var diaDoCalendario = this.calendarioGateway.consultar(agencia, data);
+    if (!diaDoCalendario.util()) {
+      throw new DiaSemAtendimentoException(agencia, data, diaDoCalendario.motivo());
+    }
   }
 
   private void exigirHorarioLivre(String agencia, LocalDate data, LocalTime horario, Long idQueRemarca) {
