@@ -1,6 +1,6 @@
 # Material do Aluno — Aula 7: Autenticação (quem está chamando?)
 
-> **Sexta, 13/11/2026 · Tempo de leitura:** ~13 min. Até agora, qualquer pessoa cadastra, troca e apaga chaves em nome de qualquer CPF. Hoje a API passa a exigir login. Faremos em dois passos, os dois ao vivo: primeiro com usuários escritos no `application.properties` (o jeito mais rápido de ver o mecanismo funcionando) e depois com usuários no banco e senha guardada como hash BCrypt (o estado final do gabarito). Autorização por papel fica para a Aula 8.
+> **Sexta, 13/11/2026, das 15h00 às 16h20 · Tempo de leitura:** ~13 min. Até agora, qualquer pessoa cadastra, troca e apaga chaves em nome de qualquer CPF. Hoje a API passa a exigir login. Este material mostra dois passos: primeiro com usuários escritos no `application.properties` (o jeito mais rápido de ver o mecanismo funcionando; **só leitura**, não fazemos em aula) e depois com usuários no banco e senha guardada como hash BCrypt (o estado final do gabarito, e o caminho que seguimos em aula). Autorização por papel fica para a Aula 8, no mesmo dia, depois do intervalo.
 
 ---
 
@@ -19,7 +19,7 @@ requisição ──► mecanismo de        ──► provedor de          ──
 ```
 
 - **Mecanismo de autenticação:** como a credencial chega. Hoje usamos **HTTP Basic**: o cliente manda `Authorization: Basic <base64 de usuario:senha>`. Liga com `quarkus.http.auth.basic=true`. Existem outros (formulário, mTLS e, com extensões, JWT e OIDC).
-- **Provedor de identidade:** onde o usuário e a senha são conferidos. Hoje, primeiro em properties (`quarkus-elytron-security-properties-file`) e depois no banco (`quarkus-security-jpa`).
+- **Provedor de identidade:** onde o usuário e a senha são conferidos. Há dois neste material: em properties (`quarkus-elytron-security-properties-file`), só como leitura, e no banco (`quarkus-security-jpa`), o caminho que seguimos em aula.
 - **`SecurityIdentity`:** o resultado, com o nome do usuário e os papéis. Pode ser injetado (`@Inject SecurityIdentity`), e é o que a Aula 8 usa para a regra "só as próprias chaves".
 
 E dois códigos que você vai ver muito:
@@ -35,9 +35,11 @@ E dois códigos que você vai ver muito:
 
 ---
 
-## 2. Passo 1: usuários no `application.properties`
+## 2. Passo 1 (leitura): usuários no `application.properties`
 
-Acrescente a extensão `quarkus-elytron-security-properties-file` (o provedor de properties é o mesmo **Elytron** do WildFly/JBoss) e estas linhas, que estão no `ESTADO.md` do gabarito da Aula 7 e foram conferidas em execução:
+> Este passo é **só leitura**: em aula, vamos direto para os usuários no banco (seção 3). Ele está aqui porque mostra o mecanismo com o mínimo de peças, e porque a competência do módulo fala em autenticação "em memória e em banco de dados".
+
+O caminho é acrescentar a extensão `quarkus-elytron-security-properties-file` (o provedor de properties é o mesmo **Elytron** do WildFly/JBoss) e estas linhas, que estão no `ESTADO.md` do gabarito da Aula 7 e foram conferidas em execução:
 
 ```properties
 quarkus.http.auth.basic=true
@@ -71,7 +73,7 @@ Content-Type: application/json;charset=UTF-8
 public class ChavePixResource {
 ```
 
-✍️ **Experimente agora.** Com o `quarkus:dev` no ar, repita as chamadas. Saídas reais:
+Com essa configuração e o `quarkus:dev` no ar, as chamadas respondem assim (saídas reais):
 
 ```
 $ curl -i localhost:8080/chaves
@@ -108,7 +110,7 @@ Sobre a senha no arquivo: sem `plain-text=true`, o realm em memória espera um h
 
 ## 3. Passo 2: usuários no banco, senha em BCrypt
 
-Troque a extensão de properties por `quarkus-security-jpa` e **apague** as linhas `quarkus.security.users.embedded.*` (o gabarito final não as tem; mantenha `quarkus.http.auth.basic=true`). O usuário vira uma entidade (`gabarito/aula-07/chaves-pix/src/main/java/tech/ada/pix/chaves/Usuario.java`):
+Este é o caminho que seguimos em aula. A extensão é `quarkus-security-jpa`, e nenhum usuário fica no `application.properties` (se você experimentou o passo 1, troque a extensão e **apague** as linhas `quarkus.security.users.embedded.*`; o gabarito final não as tem). Mantenha `quarkus.http.auth.basic=true`. O usuário vira uma entidade (`gabarito/aula-07/chaves-pix/src/main/java/tech/ada/pix/chaves/Usuario.java`):
 
 ```java
 @Entity
@@ -226,7 +228,7 @@ class ChavePixResourceTest {
 </dependency>
 ```
 
-Contagem real do gabarito da Aula 7 (`mvn verify`, 18/10/2026): **63 testes, 0 falhas** (60 no `chaves-pix`, sendo 6 do `AutenticacaoTest`, + 3 no `contas`).
+Contagem real do gabarito da Aula 7 (`mvn verify`, 18/10/2026, conferida de novo em 11/11/2026): **63 testes, 0 falhas** (60 no `chaves-pix`, sendo 6 do `AutenticacaoTest`, + 3 no `contas`).
 
 > **Da 3.15 até a 3.40** — Na **3.31**, `quarkus-junit5` passa a se chamar `quarkus-junit` (com redirecionamento do nome antigo). `@TestSecurity` e `quarkus-test-security`: sem mudança relevante até a 3.40.
 
@@ -276,10 +278,10 @@ Repare também que o `/q/health/live` continua respondendo sem login: o `@Authen
 - Tutorial Basic + JPA: https://quarkus.io/version/3.15/guides/security-getting-started-tutorial
 - Testes de segurança: https://quarkus.io/version/3.15/guides/security-testing
 
-**Para levar ao projeto final** (critério 5 da rubrica)
+**Para levar ao projeto final** (critério 5 da rubrica; o tempo de projeto em grupo desta aula fica para a segunda, 16/11, encontro inteiro de projeto)
 
 - Usuários em banco, com `quarkus-security-jpa` e senha em BCrypt: é **CORE** do projeto final. Usuários em properties servem só de degrau; a entrega é no banco.
 - Testes de `401` (sem credencial e com senha errada) e de sucesso, com credencial real, não só `@TestSecurity`.
 - Definir agora os **pelo menos 2 papéis** que a Aula 8 vai usar, e registrar os usuários de teste (fictícios) no README.
 
-> **Na próxima aula:** agora a API sabe quem está chamando. O atendente pode apagar a chave de qualquer cliente? E um titular pode ver as chaves de outro titular?
+> **Depois do intervalo, na Aula 8 (16h40):** agora a API sabe quem está chamando. O atendente pode apagar a chave de qualquer cliente? E um titular pode ver as chaves de outro titular?

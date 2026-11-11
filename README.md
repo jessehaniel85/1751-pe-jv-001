@@ -26,8 +26,9 @@ Cronograma (Seg/Qua/Sex, 15h–18h, pelo Teams; sem aula em 02/11)
 | 4 | Sex 06/11 | Configuração, health e métricas |
 | 5 | Ter 10/11 (reposição da Seg 09/11) | REST Client e Fault Tolerance |
 | 6 | Qua 11/11 | Validação e tratamento de erros |
-| 7 | Sex 13/11 | Autenticação |
-| 8 | Seg 16/11 | Autorização |
+| 7 | Sex 13/11, 15h00–16h20 | Autenticação |
+| 8 | Sex 13/11, 16h40–18h00 | Autorização |
+| — | Seg 16/11 | Fechamento dos projetos em grupo (sem conteúdo novo) |
 | 9 | Qua 18/11 | Banca do projeto final |
 
 Pilha: **Java 21** e **Quarkus 3.15.7**, com Maven pelo Nexus. Não precisa de Docker nem de Quarkus CLI.

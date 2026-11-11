@@ -1,6 +1,6 @@
 # Material do Aluno — Aula 8: Autorização (papel, posse, CORS e CSRF)
 
-> **Segunda, 16/11/2026 · Tempo de leitura:** ~15 min. Na Aula 7 a API aprendeu **quem** está chamando. Hoje ela decide **o que** cada um pode fazer. São duas perguntas diferentes, e cada uma mora num lugar: "o seu papel permite esta operação?" fica no recurso; "este dado é seu?" fica no service. No fim, dois temas que todo mundo confunde com autorização: CORS e CSRF. É também a última aula antes da banca.
+> **Sexta, 13/11/2026, das 16h40 às 18h00 (depois da Aula 7 e do intervalo) · Tempo de leitura:** ~15 min. Na Aula 7 a API aprendeu **quem** está chamando. Hoje ela decide **o que** cada um pode fazer. São duas perguntas diferentes, e cada uma mora num lugar: "o seu papel permite esta operação?" fica no recurso; "este dado é seu?" fica no service. No fim, dois temas que todo mundo confunde com autorização: CORS e CSRF. É também a última aula de conteúdo: a segunda, 16/11, é inteira de projeto, e a banca é na quarta, 18/11.
 
 ---
 
@@ -128,7 +128,7 @@ void atendenteEAuditorNaoCriamChave() {
 }
 ```
 
-Contagem real do gabarito da Aula 8, estado final do projeto guiado (`mvn verify`, 18/10/2026): **79 testes, 0 falhas** (76 no `chaves-pix`, sendo 16 do `AutorizacaoTest`, + 3 no `contas`).
+Contagem real do gabarito da Aula 8, estado final do projeto guiado (`mvn verify`, 18/10/2026, conferida de novo em 11/11/2026): **79 testes, 0 falhas** (76 no `chaves-pix`, sendo 16 do `AutorizacaoTest`, + 3 no `contas`).
 
 Para regras mais finas que papel existe `@PermissionsAllowed` (com "s"), já na 3.15; fica como leitura no guia de autorização.
 
@@ -376,11 +376,12 @@ Sem corpo e sem mensagem. Por padrão, o filtro exige corpo de formulário. Se u
 - Prevenção de CSRF: https://quarkus.io/version/3.15/guides/security-csrf-prevention
 - Testes de segurança: https://quarkus.io/version/3.15/guides/security-testing
 
-**Para levar ao projeto final** (critério 5 da rubrica e fechamento para a banca)
+**Para levar ao projeto final** (critério 5 da rubrica e fechamento para a banca; é o trabalho da segunda, 16/11, encontro inteiro de projeto)
 
 - Pelo menos 2 papéis com regras diferentes; se o domínio pedir, uma regra que dependa do dado (posse), no service.
 - Para cada endpoint: um teste com o papel permitido (sucesso), um com papel não permitido (`403`) e um sem credencial (`401`).
 - `/q/health` acessível para o orquestrador; decida e documente quem vê `/q/metrics`.
 - **Feche o mapa de evidências:** cada critério de 1 a 6 da rubrica com o teste que o prova, inclusive o caminho de erro, ligado no `AVALIACAO.md`. Rode `mvn verify` e anote a contagem real de testes no README.
 
-> **Na próxima aula:** banca. Leia o `aula-09-aluno.md` e o brief do projeto final antes de quarta.
+> **Segunda, 16/11:** encontro inteiro de projeto, a última janela antes da banca (os exercícios do LMS das Aulas 7 e 8 também ficam para esse dia).
+> **Quarta, 18/11:** banca, na ordem dos grupos sorteada hoje. Entrega até **23:59 (horário de Brasília)**, contada pelo horário do commit. Leia o `aula-09-aluno.md` e o brief do projeto final antes de quarta.

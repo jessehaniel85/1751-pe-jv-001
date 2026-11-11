@@ -178,7 +178,7 @@ Cada grupo apresenta: **demonstração** (subir os dois serviços e mostrar o fl
 
 ## 7. Cronograma de maturação (dentro das aulas)
 
-Em cada encontro, os últimos minutos são de trabalho em grupo, aplicando ao projeto o que a aula ensinou.
+Em cada encontro, os últimos minutos são de trabalho em grupo, aplicando ao projeto o que a aula ensinou. A exceção é a sexta, 13/11, que tem duas aulas e nenhum tempo de grupo; em troca, a segunda, 16/11, é inteira de projeto.
 
 | Aula | Data | O grupo avança |
 |---|---|---|
@@ -186,10 +186,10 @@ Em cada encontro, os últimos minutos são de trabalho em grupo, aplicando ao pr
 | 2 | Sex 30/10 | Contrato REST dos dois serviços (recursos e códigos HTTP); gerar os módulos pelo plugin |
 | 3 | Qua 04/11 | Entidades e consultas com Panache |
 | 4 | Sex 06/11 | Configuração por perfil, health checks e métricas |
-| 5 | Seg 09/11 | A chamada entre os serviços com REST Client e Fault Tolerance (marco: integração rodando) |
+| 5 | Ter 10/11 | A chamada entre os serviços com REST Client e Fault Tolerance (marco: integração rodando) |
 | 6 | Qua 11/11 | Validação e corpo de erro padronizado |
-| 7 | Sex 13/11 | Autenticação |
-| 8 | Seg 16/11 | Autorização (papéis) e **última janela antes da banca**: fechar os testes dos caminhos de erro e o `AVALIACAO.md` |
+| 7 e 8 | Sex 13/11 | Autenticação e autorização (papéis): última aula de conteúdo |
+| — | Seg 16/11 | Encontro inteiro de projeto, a **última janela antes da banca**: autenticação e papéis no projeto, testes dos caminhos de erro e `AVALIACAO.md` |
 | 9 | Qua 18/11 | Banca; retoques até as 23:59 |
 
 Não há aula em 02/11.
