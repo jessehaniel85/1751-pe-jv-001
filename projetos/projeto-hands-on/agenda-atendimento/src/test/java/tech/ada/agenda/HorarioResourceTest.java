@@ -42,13 +42,13 @@ class HorarioResourceTest {
 
   @Test
   void horarioAgendadoSaiDaLista() {
-    Map<String, Object> agendamento = Map.of("agencia", "0002", "data", "2026-10-29",
+    Map<String, Object> agendamento = Map.of("agencia", "0002", "data", "2026-12-09",
       "horario", "10:30", "clienteCpf", Cpfs.novo());
     given().contentType(ContentType.JSON).body(agendamento)
       .when().post("/agendamentos").then().statusCode(201);
 
     given()
-      .queryParam("data", "2026-10-29")
+      .queryParam("data", "2026-12-09")
       .when()
       .get("/agencias/0002/horarios")
       .then()
