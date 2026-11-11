@@ -31,18 +31,9 @@ public class HorarioResource {
     @QueryParam("data") LocalDate data) {//ISO 8601 -> yyyy-MM-dd
     LocalDate dataHorario = Optional.ofNullable(data)
       .orElseGet(() -> LocalDate.now().plusDays(1));
-    List<LocalTime> livres = horariosDoExpediente();
+    List<LocalTime> livres = agendaConfig.expediente().horarios();
     livres.removeAll(service.horariosOcupados(agencia, dataHorario));
     return new HorariosDoDia(agencia, dataHorario, livres);
-  }
-
-  private List<LocalTime> horariosDoExpediente() {
-    final Expediente expedientes = agendaConfig.expediente();
-    List<LocalTime> horarios = new ArrayList<>();
-    for (LocalTime hr = expedientes.abertura(); hr.isBefore(expedientes.encerramento()); hr = hr.plusMinutes(expedientes.duracaoMinutos())) {
-      horarios.add(hr);
-    }
-    return horarios;
   }
 
 }

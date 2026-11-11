@@ -1,5 +1,7 @@
 package tech.ada.agenda;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -37,7 +39,7 @@ public class AgendamentoResource {
   }
 
   @POST
-  public RestResponse<AgendamentoResponse> agendar(NovoAgendamentoRequest request, @Context UriInfo uriInfo) {
+  public RestResponse<AgendamentoResponse> agendar(@Valid @NotNull NovoAgendamentoRequest request, @Context UriInfo uriInfo) {
     Agendamento agendamento = this.service.agendar(request);
     URI location = uriInfo.getAbsolutePathBuilder().path(agendamento.getId().toString()).build();
     return RestResponse.ResponseBuilder.<AgendamentoResponse>created(location)
