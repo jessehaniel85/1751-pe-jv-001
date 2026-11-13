@@ -102,8 +102,8 @@ public class AgendamentoService {
   }
 
   /** Regra de posse: vale para o papel usuario (login = CPF); atendente e gerente passam. */
-  private void exigirPosse(String titularCpf, String mensagem) {
-    if (ehUsuario() && !usuarioLogado().equals(titularCpf)) {
+  private void exigirPosse(String clienteCpf, String mensagem) {
+    if (ehUsuario() && !usuarioLogado().equals(clienteCpf)) {
       throw new ForbiddenException(mensagem);
     }
   }
