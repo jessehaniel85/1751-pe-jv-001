@@ -2,7 +2,6 @@ package tech.ada.agenda;
 
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.core.Response;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 

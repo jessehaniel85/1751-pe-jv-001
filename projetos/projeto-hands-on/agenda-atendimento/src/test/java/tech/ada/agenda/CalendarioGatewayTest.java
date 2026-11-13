@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import io.smallrye.faulttolerance.api.CircuitBreakerMaintenance;
 import jakarta.inject.Inject;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@TestSecurity(user = "atendente", roles = "atendente")
 @QuarkusTest
 class CalendarioGatewayTest {
 

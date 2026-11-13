@@ -1,6 +1,8 @@
 package tech.ada.agenda;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.quarkus.security.ForbiddenException;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -12,13 +14,18 @@ import lombok.RequiredArgsConstructor;
 @ApplicationScoped
 public class AgendamentoService {
 
+  private static final String AGENDAMENTO_DE_OUTRO = "O agendamento pertence a outro cliente";
+  private static final String LISTA_DE_OUTRO = "Cliente só lista os próprios agendamentos";
+
   private final AgendamentoRepository repository;
   private final AgendaConfig agendaConfig;
   private final MeterRegistry registry;
   private final CalendarioGateway calendarioGateway;
+  private final SecurityIdentity identity;
 
   @Transactional
   public Agendamento agendar(NovoAgendamentoRequest request) {
+    this.exigirPosse(request.clienteCpf(), AGENDAMENTO_DE_OUTRO);
     this.exigirDiaDeAtendimento(request.agencia(), request.data());
     this.exigirHorarioLivre(request.agencia(), request.data(), request.horario(), null);
     this.exigirVagaDoCliente(request.clienteCpf());
@@ -58,11 +65,17 @@ public class AgendamentoService {
   }
 
   public List<Agendamento> listar(String clienteCpf) {
-    return clienteCpf == null ? repository.listAll() : repository.findByCliente(clienteCpf);
+    if (clienteCpf != null) {
+      this.exigirPosse(clienteCpf, LISTA_DE_OUTRO);
+    }
+    String filtro = this.ehUsuario() ? this.usuarioLogado() : clienteCpf;
+    return filtro == null ? repository.listAll() : repository.findByCliente(filtro);
   }
 
   public Agendamento buscar(Long id) {
-    return repository.findByIdOptional(id).orElseThrow(() -> new AgendamentoNaoEncontradoException(id));
+    final var agendamento = repository.findByIdOptional(id).orElseThrow(() -> new AgendamentoNaoEncontradoException(id));
+    this.exigirPosse(agendamento.getClienteCpf(), AGENDAMENTO_DE_OUTRO);
+    return agendamento;
   }
 
   public List<Agendamento> agendaDoDia(String agencia, LocalDate data) {
@@ -80,13 +93,27 @@ public class AgendamentoService {
 
   @Transactional
   public void cancelar(Long id) {
-    if (!repository.deleteById(id)) {
-      throw new AgendamentoNaoEncontradoException(id);
-    }
+    // Aula 8: busca antes de apagar, para conferir o dono (o deleteById apagaria sem olhar).
+    repository.delete(buscar(id));
   }
 
   public List<LocalTime> horariosOcupados(String agencia, LocalDate data) {
     return repository.horariosOcupados(agencia, data);
+  }
+
+  /** Regra de posse: vale para o papel titular (username = CPF); atendente e auditor passam. */
+  private void exigirPosse(String titularCpf, String mensagem) {
+    if (ehUsuario() && !usuarioLogado().equals(titularCpf)) {
+      throw new ForbiddenException(mensagem);
+    }
+  }
+
+  private boolean ehUsuario() {
+    return identity.hasRole(Papel.USUARIO);
+  }
+
+  private String usuarioLogado() {
+    return identity.getPrincipal().getName();
   }
 
 }

@@ -26,11 +26,13 @@ class ObservabilidadeTest {
 
   @Test
   void agendarIncrementaOContadorDaAgencia() {
-    given().contentType(ContentType.JSON)
+    given().auth().preemptive().basic("atendente", "atendente123")
+      .contentType(ContentType.JSON)
       .body(Map.of("agencia", "0042", "data", "2026-12-08", "horario", "10:00", "clienteCpf", Cpfs.novo()))
       .when().post("/agendamentos").then().statusCode(201);
 
-    given().when().get("/q/metrics")
+    given().auth().preemptive().basic("gerente", "gerente123")
+      .when().get("/q/metrics")
       .then().statusCode(200)
       .body(containsString("agenda_agendamentos_criados_total{agencia=\"0042\"}"));
   }

@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.notNullValue;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Um teste por endpoint e por caminho de erro. Cada teste usa uma agência e um CPF próprios, então a ordem não importa.
  */
+@TestSecurity(user = "atendente", roles = "atendente")
 @QuarkusTest
 class AgendamentoResourceTest {
 

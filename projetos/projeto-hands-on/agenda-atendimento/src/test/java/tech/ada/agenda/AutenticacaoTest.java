@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 class AutenticacaoTest {
 
-  private static final String CLIENTE = "usuario1";
+  private static final String CLIENTE = "97744180003";
 
   @Inject
   UsuarioRepository usuarios;

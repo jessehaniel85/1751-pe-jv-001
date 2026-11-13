@@ -7,11 +7,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+@TestSecurity(user = "atendente", roles = "atendente")
 @QuarkusTest
 class HorarioResourceTest {
 

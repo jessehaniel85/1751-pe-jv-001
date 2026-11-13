@@ -18,8 +18,8 @@ public class CargaUsuarios {
     this.repository.deleteAll();
     this.repository.persist(
       List.of(
-        Usuario.adicionar("usuario1", "senha123", "usuario"),
-        Usuario.adicionar("usuario2", "senha123", "usuario"),
+        Usuario.adicionar("97744180003", "senha123", "usuario"),
+        Usuario.adicionar("43930413051", "senha123", "usuario"),
         Usuario.adicionar("atendente", "atendente123", "atendente"),
         Usuario.adicionar("gerente", "gerente123", "gerente")
       )

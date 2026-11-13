@@ -1,5 +1,6 @@
 package tech.ada.agenda;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -9,15 +10,14 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import tech.ada.agenda.AgendaConfig.Expediente;
 
 //Quais horários a agência tem livres amanhã ou numa data específica?
 //GET /agencias/{codigo}/horarios?data=
 @Path("/agencias/{codigo}/horarios")
 @Produces(MediaType.APPLICATION_JSON)
+@PermitAll
 public class HorarioResource {
 
   @Inject

@@ -1,6 +1,7 @@
 package tech.ada.agenda;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.quarkus.security.ForbiddenException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -41,6 +42,13 @@ public class ExceptionMappers {
   @ServerExceptionMapper
   public RestResponse<ErroResposta> calendarioIndisponivel(CalendarioIndisponivelException e) {
     return resposta(ErroResposta.de(HttpResponseStatus.SERVICE_UNAVAILABLE.code(), "Calendário indisponível", e.getMessage()));
+  }
+
+  /** Aula 8: 403 com o mesmo corpo, tanto do @RolesAllowed quanto da regra de posse do service. */
+  @ServerExceptionMapper
+  public RestResponse<ErroResposta> acessoNegado(ForbiddenException e) {
+    String mensagem = e.getMessage() == null ? "Seu papel não permite esta operação" : e.getMessage();
+    return resposta(ErroResposta.de(403, "Acesso negado", mensagem));
   }
 
   private static RestResponse<ErroResposta> resposta(ErroResposta erro) {

@@ -5,10 +5,12 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+@TestSecurity(user = "atendente", roles = "atendente")
 @QuarkusTest
 class AgendaDaAgenciaResourceTest {
 
