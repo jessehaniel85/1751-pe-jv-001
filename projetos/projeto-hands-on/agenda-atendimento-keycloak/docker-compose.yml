@@ -1,0 +1,16 @@
+# Complemento Keycloak: provedor de identidade da Agenda, com os mesmos usuários de aula do CargaUsuarios
+# (realm "agenda", importado de keycloak/realm-agenda.json a cada subida; nada é persistido).
+# Subir: docker compose up -d      Derrubar: docker compose down
+# Console: http://localhost:8180 (admin / admin, só para a aula)
+name: agenda-keycloak
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/realm-agenda.json:/opt/keycloak/data/import/realm-agenda.json:ro

@@ -1,0 +1,105 @@
+{
+  "realm": "agenda",
+  "enabled": true,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      {
+        "name": "usuario",
+        "description": "Cliente: só os próprios agendamentos"
+      },
+      {
+        "name": "atendente",
+        "description": "Atendente da agência"
+      },
+      {
+        "name": "gerente",
+        "description": "Gerente: consulta e métricas"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "agenda-atendimento",
+      "description": "Cliente público só para a aula: o login por senha (direct access grant) permite pedir token com curl",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "97744180003",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Maria",
+      "lastName": "Cliente",
+      "email": "97744180003@agenda.example",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "senha123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "usuario"
+      ]
+    },
+    {
+      "username": "43930413051",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "João",
+      "lastName": "Cliente",
+      "email": "43930413051@agenda.example",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "senha123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "usuario"
+      ]
+    },
+    {
+      "username": "atendente",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Atendente",
+      "lastName": "Agência",
+      "email": "atendente@agenda.example",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "atendente123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "atendente"
+      ]
+    },
+    {
+      "username": "gerente",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Gerente",
+      "lastName": "Agência",
+      "email": "gerente@agenda.example",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "gerente123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "gerente"
+      ]
+    }
+  ]
+}
