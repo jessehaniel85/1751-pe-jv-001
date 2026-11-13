@@ -101,7 +101,7 @@ public class AgendamentoService {
     return repository.horariosOcupados(agencia, data);
   }
 
-  /** Regra de posse: vale para o papel titular (username = CPF); atendente e auditor passam. */
+  /** Regra de posse: vale para o papel usuario (login = CPF); atendente e gerente passam. */
   private void exigirPosse(String titularCpf, String mensagem) {
     if (ehUsuario() && !usuarioLogado().equals(titularCpf)) {
       throw new ForbiddenException(mensagem);
