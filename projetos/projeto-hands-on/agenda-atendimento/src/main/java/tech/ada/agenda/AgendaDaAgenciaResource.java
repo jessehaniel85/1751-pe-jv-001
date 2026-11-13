@@ -1,5 +1,6 @@
 package tech.ada.agenda;
 
+import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Authenticated
 //GET /agencias/{codigo}/agendamentos?data=
 @Path("/agencias/{codigo}/agendamentos")
 @Produces(MediaType.APPLICATION_JSON)

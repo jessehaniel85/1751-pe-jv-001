@@ -1,5 +1,6 @@
 package tech.ada.agenda;
 
+import io.quarkus.security.Authenticated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.util.List;
 import org.jboss.resteasy.reactive.RestResponse;
 
+@Authenticated
 @Path("/agendamentos")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
